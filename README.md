@@ -6,20 +6,20 @@ Docker image for `nginx` used as a proxy for projects made by Dekalabs.
 
 Example of a `docker-compose.yml` file that uses this image:
 
-  version: '3'
+    version: '3'
 
-  services:
+    services:
 
-    service:
-      image: registry.dekaside.com/service/service:latest
-      command: ./start
+      service:
+        image: registry.dekaside.com/service/service:latest
+        command: ./start
 
-    ningx:
-      image: registry.dekaside.com/library/nginx:latest
-      environment:
-        - NGINX_UPSTREAM_APP=app
-        - NGINX_UPSTREAM_SERVER=service
-        - NGINX_UPSTREAM_PORT=5000
-        - NGINX_PORT=80
-        - NGINX_HOST=localhost
-        - NGINX_MAX_BODY_SIZE=20M
+      ningx:
+        image: registry.dekaside.com/library/nginx:latest
+        environment:
+          - NGINX_UPSTREAM_APP=app
+          - NGINX_UPSTREAM_SERVER=service
+          - NGINX_UPSTREAM_PORT=5000
+          - NGINX_PORT=80
+          - NGINX_HOST=localhost
+          - NGINX_MAX_BODY_SIZE=20M

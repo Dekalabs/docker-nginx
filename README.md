@@ -15,9 +15,7 @@ Example of a `docker-compose.yml` file that uses this image:
       command: ./start
 
     ningx:
-      build:
-        context: .
-        dockerfile: ./Dockerfile
+      image: registry.dekaside.com/library/nginx:latest
       environment:
         - NGINX_UPSTREAM_APP=app
         - NGINX_UPSTREAM_SERVER=service

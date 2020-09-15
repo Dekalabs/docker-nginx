@@ -1,0 +1,81 @@
+upstream ${NGINX_UPSTREAM_APP} {
+  server ${NGINX_UPSTREAM_SERVER}:${NGINX_UPSTREAM_PORT};
+}
+
+server {
+  listen ${NGINX_PORT};
+  server_name ${NGINX_HOST};
+  charset utf-8;
+  client_max_body_size ${NGINX_MAX_BODY_SIZE};
+
+  location /health {
+    access_log off;
+    return 200;
+  }
+
+  # CORS headers and alias for media
+  location /media {
+    if ($request_method = 'OPTIONS') {
+      add_header 'Access-Control-Allow-Origin' '*';
+      add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+      add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+      add_header 'Access-Control-Max-Age' 1728000;
+      add_header 'Content-Type' 'text/plain; charset=utf-8';
+      add_header 'Content-Length' 0;
+      return 204;
+    }
+    if ($request_method = 'POST') {
+      add_header 'Access-Control-Allow-Origin' '*';
+      add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+      add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+      add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
+    }
+    if ($request_method = 'GET') {
+      add_header 'Access-Control-Allow-Origin' '*';
+      add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+      add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+      add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
+    }
+    alias /data/media;
+  }
+
+  # CORS headers and alias for static
+  location /static {
+    if ($request_method = 'OPTIONS') {
+      add_header 'Access-Control-Allow-Origin' '*';
+      add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+      add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+      add_header 'Access-Control-Max-Age' 1728000;
+      add_header 'Content-Type' 'text/plain; charset=utf-8';
+      add_header 'Content-Length' 0;
+      return 204;
+    }
+    if ($request_method = 'POST') {
+      add_header 'Access-Control-Allow-Origin' '*';
+      add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+      add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+      add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
+    }
+    if ($request_method = 'GET') {
+      add_header 'Access-Control-Allow-Origin' '*';
+      add_header 'Access-Control-Allow-Methods' 'GET, POST, OPTIONS';
+      add_header 'Access-Control-Allow-Headers' 'DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization';
+      add_header 'Access-Control-Expose-Headers' 'Content-Length,Content-Range';
+    }
+    alias /data/static;
+  }
+
+  location / {
+    # Checks for static file, if not found proxy to app
+    try_files $uri @proxy_to_app;
+  }
+
+  # App
+  location @proxy_to_app {
+    proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+    proxy_set_header Host $http_host;
+    proxy_redirect off;
+    proxy_pass http://${NGINX_UPSTREAM_APP};
+
+  }
+}

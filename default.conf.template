@@ -6,7 +6,7 @@ upstream ${NGINX_UPSTREAM_APP} {
 map $request_uri $loggable {
   /health 0;
   /elb-status 0;
-  /proxy-health/ 0;
+  /proxy-health 0;
   default 1;
 }
 

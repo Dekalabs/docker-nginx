@@ -2,25 +2,27 @@ upstream ${NGINX_UPSTREAM_APP} {
   server ${NGINX_UPSTREAM_SERVER}:${NGINX_UPSTREAM_PORT};
 }
 
+# Uses map to disable the requests that may no be logged
+map $request_uri $loggable {
+  /health 0;
+  /elb-status 0;
+  /proxy-health/ 0;
+  default 1;
+}
+
 server {
   listen ${NGINX_PORT};
   server_name ${NGINX_HOST};
   charset utf-8;
   client_max_body_size ${NGINX_MAX_BODY_SIZE};
+  access_log /var/log/nginx/access.log combined if=$loggable;
 
-  # Health checks for load balancers
+  # Health checks for external load balancers
   location /health {
-    access_log off;
     return 200;
   }
   location /elb-status {
-    access_log off;
     return 200;
-  }
-  # Proxy health check
-  location /proxy-health {
-    access_log off;
-    try_files / @proxy_to_${NGINX_UPSTREAM_APP};
   }
 
   location / {
